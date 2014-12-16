@@ -26,6 +26,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('host')->defaultFalse()->end()
                 ->scalarNode('web_dir')->isRequired()->end()
                 ->scalarNode('mode')->defaultValue('fopen')->end()
+                ->scalarNode('ip')->defaultFalse()->end()
             ->end()
         ->end();
 

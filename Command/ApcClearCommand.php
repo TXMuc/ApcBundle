@@ -73,7 +73,15 @@ class ApcClearCommand extends ContainerAwareCommand
             $host = sprintf("%s://%s", $this->getContainer()->getParameter('router.request_context.scheme'), $this->getContainer()->getParameter('router.request_context.host'));
         }
 
-        $url = $host.'/'.$filename;
+        // if the 'ip' parameter is set, add the 'Host:' field to the http header
+        if ($this->getContainer()->getParameter('ornicar_apc.ip') && $this->getContainer()->getParameter('ornicar_apc.mode') == 'curl') {
+            $url = 'http://'.$this->getContainer()->getParameter('ornicar_apc.ip').'/'.$filename;
+            $httpHeader = array('Host: '. preg_replace('#^https?://#', '', $host));
+        } else {
+            $url = $host.'/'.$filename;
+            $httpHeader = array();
+        }
+
         $auth = $input->getOption('auth');
 
         if ($this->getContainer()->getParameter('ornicar_apc.mode') == 'fopen') {
@@ -103,7 +111,8 @@ class ApcClearCommand extends ContainerAwareCommand
             curl_setopt_array($ch, array(
                 CURLOPT_HEADER => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_FAILONERROR => true
+                CURLOPT_FAILONERROR => true,
+                CURLOPT_HTTPHEADER => $httpHeader
             ));
 
             if (false === is_null($auth)) {
